@@ -30,10 +30,12 @@ func imageNamed(_ name: String) -> UIImage {
 func localizedString(_ key: String) -> String {
   if let path = Bundle(for: BarcodeScannerViewController.self).resourcePath,
     let resourceBundle = Bundle(path: path + "/Localization.bundle") {
-    return resourceBundle.localizedString(forKey: key, value: nil, table: "Localizable")
+    return resourceBundle.localizedString(forKey: key, value: key, table: "Localizable")
   }
-  return key
+  
+    return Bundle(for: BarcodeScannerViewController.self).localizedString(forKey: key, value: key, table: "Localizable")
 }
+
 
 /// Checks if the app is running in Simulator.
 var isSimulatorRunning: Bool = {

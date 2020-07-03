@@ -47,6 +47,9 @@ open class BarcodeScannerViewController: UIViewController {
   /// and waits for the next reset action.
   public var isOneTimeSearch = true
 
+  public var ignoreDuplicates = false
+  private var lastScannedCode: String? = nil
+    
   /// `AVCaptureMetadataOutput` metadata object types.
   public var metadata = AVMetadataObject.ObjectType.barcodeScannerMetadata {
     didSet {
@@ -148,7 +151,7 @@ open class BarcodeScannerViewController: UIViewController {
     let animatedTransition = newValue.state == .processing
       || oldValue.state == .processing
       || oldValue.state == .notFound
-    let duration = newValue.animated && animatedTransition ? 0.5 : 0.0
+    let duration = newValue.animated && animatedTransition ? 2.0 : 0.0
     let delayReset = oldValue.state == .processing || oldValue.state == .notFound
 
     if !delayReset {
@@ -330,6 +333,7 @@ extension BarcodeScannerViewController: CameraViewControllerDelegate {
 
     if isOneTimeSearch {
       locked = true
+      controller.stopCapturing()
     }
 
     var rawType = metadataObj.type.rawValue
@@ -341,7 +345,10 @@ extension BarcodeScannerViewController: CameraViewControllerDelegate {
       rawType = AVMetadataObject.ObjectType.upca.rawValue
     }
 
-    codeDelegate?.scanner(self, didCaptureCode: code, type: rawType)
-    animateFlash(whenProcessing: isOneTimeSearch)
+    if(!ignoreDuplicates || lastScannedCode != code){
+        lastScannedCode = code
+        codeDelegate?.scanner(self, didCaptureCode: code, type: rawType)
+        animateFlash(whenProcessing: isOneTimeSearch)
+    }
   }
 }
